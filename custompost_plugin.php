@@ -159,8 +159,13 @@ function display_table()
 
 add_action('init', 'display_table');
 
-function my_theme_enqueue_styles() {
-    wp_enqueue_style( 'my-theme-style', get_stylesheet_uri() );
-  }
 
-add_action( 'wp_enqueue_scripts', 'my_theme_enqueue_styles' );
+function my_plugin_register_styles() {
+    wp_register_style( 'my-plugin-style', plugins_url( '/style.css', __FILE__ ) );
+  }
+  
+  add_action( 'wp_enqueue_scripts', 'my_plugin_register_styles' );
+  
+
+
+
