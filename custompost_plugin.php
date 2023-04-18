@@ -133,23 +133,16 @@ function display_table()
 <?php
     global $wpdb;
 
-    // $table_name = $wpdb->prefix . 'posts';
-
-    // $results = $wpdb->get_results("SELECT ID, post_title, post_content, post_date FROM $table_name WHERE post_type = $p_type limit $entries");
-
     echo '<table id="upcoming-table">';
-    echo '<thead><tr><th>ID</th><th>Title</th><th>Description</th><th>date</th></tr></thead>';
+    echo '<thead><tr><th>ID</th><th>Title</th><th>Description</th><th>Slug</th><th>date</th></tr></thead>';
 
     foreach ($comstum_post as $row) {
         echo '<tr>';
         echo '<td>' . $row->ID . '</td>';
         echo '<td>' . $row->post_title . '</td>';
         echo '<td>' . wp_trim_words($row->post_content,20) . '</td>';
+        echo '<td>'. $row->post_name . '</td>';
         echo '<td>' . $row->post_date . '</td>';
-        
-        
-        // echo '<td>' . get_userdata($row->author)->user_login . '</td>';
-        // echo '<td>' . get_userdata($row->reviewer)->user_login . '</td>';
         echo '</tr>';
     }
 
@@ -160,11 +153,7 @@ function display_table()
 add_action('init', 'display_table');
 
 
-function my_plugin_register_styles() {
-    wp_register_style( 'my-plugin-style', plugins_url( '/style.css', __FILE__ ) );
-  }
-  
-  add_action( 'wp_enqueue_scripts', 'my_plugin_register_styles' );
+wp_enqueue_style( 'my-plugin-style', plugins_url( '/style.css', __FILE__ ) );
   
 
 
