@@ -125,7 +125,7 @@ function display_table()
 
     // $result = new WP_Query($args);
     // echo $result;
-    $comstum_post = get_posts( $args );
+    $comstum_post = new WP_Query( $args );
     
 ?>
     <br><br>
@@ -136,15 +136,18 @@ function display_table()
     echo '<table id="upcoming-table">';
     echo '<thead><tr><th>ID</th><th>Title</th><th>Description</th><th>Slug</th><th>date</th></tr></thead>';
 
-    foreach ($comstum_post as $row) {
-        echo '<tr>';
-        echo '<td>' . $row->ID . '</td>';
-        echo '<td>' . $row->post_title . '</td>';
-        echo '<td>' . wp_trim_words($row->post_content,20) . '</td>';
-        echo '<td>'. $row->post_name . '</td>';
-        echo '<td>' . $row->post_date . '</td>';
-        echo '</tr>';
-    }
+    
+        foreach($comstum_post->posts as $row)
+        {
+            echo '<tr>';
+            echo '<td>' . $row->ID . '</td>';
+            echo '<td>' . $row->post_title . '</td>';
+            echo '<td>' . wp_trim_words($row->post_content,20) . '</td>';
+            echo '<td>'. $row->post_name . '</td>';
+            echo '<td>' . $row->post_date . '</td>';
+            echo '</tr>';
+        }
+    
 
     echo '</table>';
 }
