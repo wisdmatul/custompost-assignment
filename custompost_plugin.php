@@ -7,12 +7,11 @@
  * Version: 1.0.0
  * Text Domain: custompost-plugin
 */
-
-//for security puposes
-// if ( !define('ABSPATH') )
-// {
-//     die("");
-// }
+function custom_post_script()
+{
+    wp_enqueue_script('my-plugin-script', plugins_url( '/script.js', __FILE__ ));
+}
+add_action('wp_enqueue_scripts','custom_post_script');
 
 //creating custom post type for courses
 function custom_post_course()
@@ -71,7 +70,7 @@ add_action( 'init', 'custom_post_session' );
 function show_form_table()
 {
     
-    
+    ob_start();
 ?>
     <form method = "post">
         <label for="choice">Select</label>
@@ -98,8 +97,9 @@ function show_form_table()
     </form>
 
 <?php 
-    
-
+$output = ob_get_contents();
+ob_get_clean();
+return $output;
 }
 
 //TO define shortcode
@@ -110,54 +110,91 @@ function custompost_shortcodes()
 
 add_action('init', 'custompost_shortcodes');
 
-function display_table()
-{
-    if( isset( $_POST['submit'] ))
-    {
-        $p_type = $_POST["select"];
-        $entries = $_POST["entries"];
-        
-        
-    $args = array(
-        'post_type' => $p_type, // set the post type to your custom post type
-        'posts_per_page' => $entries // set the number of posts to be fetched
-    );
+function display_post_table() {
+    if (isset($_POST['submit'])) {
+        $post_type = $_POST['select'];
+        $entries = $_POST['entries'];
+        $paged = get_query_var('paged') ? get_query_var('paged') : 1;
 
-    // $result = new WP_Query($args);
-    // echo $result;
-    $comstum_post = new WP_Query( $args );
-    
-?>
-    <br><br>
-    <h1 class="table-title">Posts Details</Details></h1>
-<?php
-    global $wpdb;
+        $args = array(
+            'post_type' => $post_type,
+            // '' => $entries
+            'posts_per_page' => $entries,
+            'paged' => $paged
+        );
 
-    echo '<table id="upcoming-table">';
-    echo '<thead><tr><th>ID</th><th>Title</th><th>Description</th><th>Slug</th><th>date</th></tr></thead>';
+        $query = new WP_Query($args);
 
-    
-        foreach($comstum_post->posts as $row)
-        {
-            echo '<tr>';
-            echo '<td>' . $row->ID . '</td>';
-            echo '<td>' . $row->post_title . '</td>';
-            echo '<td>' . wp_trim_words($row->post_content,20) . '</td>';
-            echo '<td>'. $row->post_name . '</td>';
-            echo '<td>' . $row->post_date . '</td>';
-            echo '</tr>';
+        if ($query->have_posts()) {
+            echo '<h2>Post Table</h2>';
+
+            // Display the form for selecting the number of posts to display
+            echo '<form method="post">';
+            echo '<label for="post_type">Post Type:</label>';
+            echo '<select name="post_type">';
+            $post_types = get_post_types();
+            foreach ($post_types as $type) {
+                echo '<option value="' . $type . '"' . ($type == $post_type ? ' selected="selected"' : '') . '>' . ucfirst($type) . '</option>';
+            }
+            echo '</select>';
+            echo '<label for="entries">Entries per page:</label>';
+            echo '<input type="number" name="entries" min="1" value="' . $entries . '">';
+            
+            echo '</form>';
+
+            // Display the table
+            echo '<table id="upcoming-table">';
+            echo '<thead><tr><th>ID</th><th>Title</th><th>Content</th><th>Slug</th><th>Date</th></tr></thead>';
+            echo '<tbody>';
+            while ($query->have_posts()) {
+                $query->the_post();
+                echo '<tr>';
+                echo '<td>' . get_the_ID() . '</td>';
+                echo '<td>' . get_the_title() . '</td>';
+                echo '<td>' . wp_trim_words(get_the_content(), 20) . '</td>';
+                echo '<td>' . basename(get_permalink()) . '</td>';
+                echo '<td>' . get_the_date() . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody>';
+            echo '</table>';
+
+            // Display the pagination links
+            $total_pages = $query->max_num_pages;
+            echo '<div class="pagination">';
+            echo paginate_links(array(
+                'base' => get_pagenum_link(1) . '%_%',
+                'format' => 'page/%#%',
+                'current' => $paged,
+                'total' => $total_pages,
+                'prev_text' => __('« Prev'),
+                'next_text' => __('Next »'),
+            ));
+            echo '</div>';
+
+            wp_reset_postdata();
         }
-    
-
-    echo '</table>';
+    } else {
+        // Display the form for selecting the number of posts to display
+        echo '<form method="post">';
+        echo '<label for="post_type">Post Type:</label>';
+        echo '<select name="post_type">';
+        $post_types = get_post_types();
+        foreach ($post_types as $type) {
+            echo '<option value="' . $type . '">' . ucfirst($type) . '</option>';
+        }
+        echo '</select>';
+        echo '<label for="entries">Entries per page:</label>';
+        echo '<input type="number" name="entries" min="1" value="10">';
+        echo '<input type="submit" name="submit" value="Submit">';
+        echo '</form>';
+    }
 }
-}
 
-add_action('init', 'display_table');
+
+
+add_action('init', 'display_post_table');
 
 
 wp_enqueue_style( 'my-plugin-style', plugins_url( '/style.css', __FILE__ ) );
-  
-
-
 
