@@ -72,7 +72,7 @@ function show_form_table()
     
     ob_start();
 ?>
-    <form method = "post">
+    <form method = "get">
         <label for="choice">Select</label>
         <select name="select" id="select">
             <option value = "courses">Courses</option>
@@ -110,10 +110,13 @@ function custompost_shortcodes()
 
 add_action('init', 'custompost_shortcodes');
 
-function display_post_table() {
-    if (isset($_POST['submit'])) {
-        $post_type = $_POST['select'];
-        $entries = $_POST['entries'];
+function display_post_table($content) {
+    if (isset($_GET['submit'])) {
+        // $post_type = $_POST['select'];
+        // $entries = $_POST['entries'];
+
+        $post_type = $_GET['select'];
+        $entries = intval($_GET['entries']);
         $paged = get_query_var('paged') ? get_query_var('paged') : 1;
 
         $args = array(
@@ -129,7 +132,7 @@ function display_post_table() {
             echo '<h2>Post Table</h2>';
 
             // Display the form for selecting the number of posts to display
-            echo '<form method="post">';
+            echo '<form method="get">';
             echo '<label for="post_type">Post Type:</label>';
             echo '<select name="post_type">';
             $post_types = get_post_types();
@@ -160,15 +163,17 @@ function display_post_table() {
             echo '</table>';
 
             // Display the pagination links
-            $total_pages = $query->max_num_pages;
+            // $total_pages = $query->max_num_pages;
+            $big=999999999;
             echo '<div class="pagination">';
             echo paginate_links(array(
-                'base' => get_pagenum_link(1) . '%_%',
+                'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
                 'format' => 'page/%#%',
-                'current' => $paged,
-                'total' => $total_pages,
-                'prev_text' => __('« Prev'),
-                'next_text' => __('Next »'),
+                'current' => max( 1, get_query_var('paged') ),
+                'total' => $query->max_num_pages,
+                'prev_next' => true,
+                'prev_text' => __('&laquo; Previous'),
+                'next_text' => __('Next &raquo;'),
             ));
             echo '</div>';
 
@@ -189,11 +194,14 @@ function display_post_table() {
         echo '<input type="submit" name="submit" value="Submit">';
         echo '</form>';
     }
+
+    return $content;
 }
 
 
 
-add_action('init', 'display_post_table');
+//add_action('init', 'display_post_table');
+add_filter('the_content','display_post_table');
 
 
 wp_enqueue_style( 'my-plugin-style', plugins_url( '/style.css', __FILE__ ) );
