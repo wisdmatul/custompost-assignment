@@ -45,3 +45,59 @@
   #upcoming-table tr {
     border-bottom: 1px solid #222;
   }
+
+  /* .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+}
+
+.col-md-4 {
+    padding: 0 15px;
+    width: calc(100% / 3);
+} */
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 15px;
+  justify-items: center;
+}
+
+.card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 300px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.card-img-top {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.card-title {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.card-text {
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.col-md-4 {
+  max-width: fit-content;
+}
+
+.pagination {
+  /* margin-top: 30px; */
+  padding-top: 40px;
+}

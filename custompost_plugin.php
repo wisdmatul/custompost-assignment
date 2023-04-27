@@ -39,6 +39,7 @@ function custom_post_course()
             'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 			'menu_icon' => 'dashicons-store',
             'description'        => __( 'Description.', 'custompost-plugin' ),
+            'show_in_nav_menus' => true,
         )
     );
 }
@@ -58,6 +59,7 @@ function custom_post_session()
             'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
 			'menu_icon' => 'dashicons-store',
             'description'        => __( 'Description.', 'custompost-plugin' ),
+            'show_in_nav_menus' => true,
         )
     );
 }
@@ -129,38 +131,45 @@ function display_post_table($content) {
         $query = new WP_Query($args);
 
         if ($query->have_posts()) {
-            echo '<h2>Post Table</h2>';
-
-            // Display the form for selecting the number of posts to display
-            echo '<form method="get">';
-            echo '<label for="post_type">Post Type:</label>';
-            echo '<select name="post_type">';
-            $post_types = get_post_types();
-            foreach ($post_types as $type) {
-                echo '<option value="' . $type . '"' . ($type == $post_type ? ' selected="selected"' : '') . '>' . ucfirst($type) . '</option>';
+            //grid layout for posts
+            echo '<div class = "row">';
+            while ( $query->have_posts() ) {
+                $query->the_post();
+                $image=wp_get_attachment_image_src( get_post_thumbnail_id( get_the_id() ), 'custom_img' );
+                echo '<div class="col-md-4">';
+                    echo '<div class="card">';
+                        echo '<img class="card-img-top" src = "'. $image[0] .'">';
+                        
+                        echo '<div class="card-body">';
+                            echo '<h5 class="card-title">' .  the_title() . '</h5>';
+                            echo '<p class="card-text">' . wp_trim_words(get_the_content(), 20) . '</p>';
+                            
+                        echo '</div>';
+                    echo '</div>';
+                echo '</div>';
+                
             }
-            echo '</select>';
-            echo '<label for="entries">Entries per page:</label>';
-            echo '<input type="number" name="entries" min="1" value="' . $entries . '">';
+            echo '</div>';
             
-            echo '</form>';
 
             // Display the table
-            echo '<table id="upcoming-table">';
-            echo '<thead><tr><th>ID</th><th>Title</th><th>Content</th><th>Slug</th><th>Date</th></tr></thead>';
-            echo '<tbody>';
-            while ($query->have_posts()) {
-                $query->the_post();
-                echo '<tr>';
-                echo '<td>' . get_the_ID() . '</td>';
-                echo '<td>' . get_the_title() . '</td>';
-                echo '<td>' . wp_trim_words(get_the_content(), 20) . '</td>';
-                echo '<td>' . basename(get_permalink()) . '</td>';
-                echo '<td>' . get_the_date() . '</td>';
-                echo '</tr>';
-            }
-            echo '</tbody>';
-            echo '</table>';
+            // echo '<h2 class = "table-title">Post Table</h2>';
+            
+            // echo '<table id="upcoming-table">';
+            // echo '<thead><tr><th>ID</th><th>Title</th><th>Content</th><th>Slug</th><th>Date</th></tr></thead>';
+            // echo '<tbody>';
+            // while ($query->have_posts()) {
+            //     $query->the_post();
+            //     echo '<tr>';
+            //     echo '<td>' . get_the_ID() . '</td>';
+            //     echo '<td>' . get_the_title() . '</td>';
+            //     echo '<td>' . wp_trim_words(get_the_content(), 20) . '</td>';
+            //     echo '<td>' . basename(get_permalink()) . '</td>';
+            //     echo '<td>' . get_the_date() . '</td>';
+            //     echo '</tr>';
+            // }
+            // echo '</tbody>';
+            // echo '</table>';
 
             // Display the pagination links
             // $total_pages = $query->max_num_pages;
@@ -179,30 +188,13 @@ function display_post_table($content) {
 
             wp_reset_postdata();
         }
-    } else {
-        // Display the form for selecting the number of posts to display
-        echo '<form method="post">';
-        echo '<label for="post_type">Post Type:</label>';
-        echo '<select name="post_type">';
-        $post_types = get_post_types();
-        foreach ($post_types as $type) {
-            echo '<option value="' . $type . '">' . ucfirst($type) . '</option>';
-        }
-        echo '</select>';
-        echo '<label for="entries">Entries per page:</label>';
-        echo '<input type="number" name="entries" min="1" value="10">';
-        echo '<input type="submit" name="submit" value="Submit">';
-        echo '</form>';
-    }
+    } 
 
     return $content;
 }
-
-
-
 //add_action('init', 'display_post_table');
 add_filter('the_content','display_post_table');
 
 
-wp_enqueue_style( 'my-plugin-style', plugins_url( '/style.css', __FILE__ ) );
 
+wp_enqueue_style( 'my-plugin-style', plugins_url( '/style.css', __FILE__ ) );
